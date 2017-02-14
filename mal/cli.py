@@ -136,6 +136,21 @@ def create_parser():
                             help='add anime with this status (e.g "on hold")')
     parser_add.set_defaults(func=commands.add)
 
+    # Parser for "edit" command
+    parser_edit = subparsers.add_parser('edit',
+                                       help='edit anime information')
+    parser_edit.add_argument('section',
+                             help=('section to edit, can be one of: '
+                                   '[%(choices)s]'),
+                             nargs='?',
+                             default=None,
+                             metavar='section',
+                             choices=['status', 'score', 'tags',
+                                      'start', 'end'])
+    parser_edit.add_argument('anime_regex',
+                            help='regex pattern to match anime titles')
+    parser_edit.set_defaults(func=commands.edit)
+
     return parser
 
 

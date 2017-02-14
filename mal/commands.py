@@ -67,6 +67,11 @@ def add(mal, args):
     core.add(mal, args.anime_regex.lower(), status=args.status)
 
 
+def edit(mal, args):
+    """Edit any of the stored information on an anime."""
+    core.edit(mal, args.section, args.anime_regex.lower())
+
+
 def config(mal, args):
     # Show the current config file
     setup.print_config()

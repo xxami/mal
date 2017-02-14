@@ -248,6 +248,23 @@ def stats(mal, username=None):
     print("\n".join(lines))
 
 
+def edit(mal, section, regex):
+    """Let user selected what to change, and change it."""
+    item = select_item(mal.find(regex))
+    print(item)
+
+    # which attribute does the user want to change
+    if not section:
+        choices = ["Status", "Score", "Tags", "Start date", "End date"]
+        sections = ["status", "score", "tags", "start", "end"]
+        print("What attribute do you want to edit?")
+        for i, choice in enumerate(choices): print(i, ": ", choice, sep="")
+        section = sections[int(input("Which one? "))] # error checking? pffffff
+
+    print("You want to change the", section, "of", item["title"])
+    mal.update(item["id"], {section: input("New? ")})
+
+
 def find(mal, regex, filtering='all', extra=False, user=None):
     """Find all anime in a certain status given a regex."""
     items = mal.find(regex, extra=extra, user=user)
