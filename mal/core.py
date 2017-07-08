@@ -250,19 +250,21 @@ def stats(mal, username=None):
 
 def edit(mal, section, regex):
     """Let user selected what to change, and change it."""
-    item = select_item(mal.find(regex))
-    print(item)
+    item = select_item(mal.find(regex, extra=True))
+    print("DEBUG:", item)
 
     # which attribute does the user want to change
     if not section:
-        choices = ["Status", "Score", "Tags", "Start date", "End date"]
+        choices = ["status", "score", "tags", "start date", "end date"]
         sections = ["status", "score", "tags", "start", "end"]
         print("What attribute do you want to edit?")
-        for i, choice in enumerate(choices): print(i, ": ", choice, sep="")
-        section = sections[int(input("Which one? "))] # error checking? pffffff
+        for i, choice in enumerate(choices): print(i, ": ", choice.capitalize(), sep="")
+        choice = int(input("Which one? "))
+        section = sections[choice] # error checking? pffffff
 
     print("You want to change the", section, "of", item["title"])
-    mal.update(item["id"], {section: input("New? ")})
+    print("Current {}:".format(choices[choice]), item[section])
+    mal.update(item["id"], {section: input("New: ")})
 
 
 def find(mal, regex, filtering='all', extra=False, user=None):
