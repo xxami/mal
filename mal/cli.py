@@ -114,6 +114,13 @@ def create_parser():
                              help='regex pattern to match anime titles')
     parser_drop.set_defaults(func=commands.drop)
 
+    # Parser for watch command
+    parser_watch = subparsers.add_parser('watch',
+                                         help='Open the next episode on web browser')
+    parser_watch.add_argument('anime_regex',
+                              help='regex pattern to match anime titles')
+    parser_watch.set_defaults(func=commands.watch)
+
     # Parser for "stats" command
     parser_stats = subparsers.add_parser('stats',
                                          help='Show anime watch stats')

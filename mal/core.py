@@ -70,6 +70,20 @@ def remove_completed(items):
     return items
 
 
+def watch(mal, regex):
+    import string
+    import webbrowser
+    items = remove_completed(mal.find(regex))
+    item = select_item(items)
+    episode = item['episode'] + 1
+    title = item['title'].replace(' ', '-').lower()
+    title = ''.join([x for x in title
+                     if x in string.ascii_lowercase+'-'])
+
+    url = f'www.superanimes.com/{title}/episodio-{episode}'
+
+    webbrowser.open(url)
+
 def progress_update(mal, regex, inc):
     items = remove_completed(mal.find(regex))
     item = select_item(items)  # also handles ambigious searches

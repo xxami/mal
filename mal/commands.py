@@ -70,3 +70,7 @@ def add(mal, args):
 def config(mal, args):
     # Show the current config file
     setup.print_config()
+
+
+def watch(mal, args):
+    core.watch(mal, args.anime_regex.lower())
