@@ -71,6 +71,25 @@ def remove_completed(items):
 
 
 def watch(mal, regex):
+    """For now only open the given anime on www.superanimes.com
+
+    This is a hack way to get the next episode opened on www.superanimes.com
+    (PT-BR). Not works for all animes.
+
+    The script make a strong assumption that the MAL anime title
+    is the same on URL of www.superanimes.com with kabeb-case.
+
+    Ex.:
+
+    ❯ mal filter gab
+    Matched 1 items:
+    1: Gabriel DropOut
+       Watching at 6/12 episodes with score -
+
+    Gabriel Droput episode 6 should be converted to:
+
+    www.superanimes.com/gabriel-dropout/episodio-6
+    """
     import os
     import string
     import webbrowser
