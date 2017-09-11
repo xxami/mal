@@ -71,8 +71,10 @@ def remove_completed(items):
 
 
 def watch(mal, regex):
+    import os
     import string
     import webbrowser
+    from multiprocessing import Process
     items = remove_completed(mal.find(regex))
     item = select_item(items)
     episode = item['episode'] + 1
@@ -82,7 +84,24 @@ def watch(mal, regex):
 
     url = f'www.superanimes.com/{title}/episodio-{episode}'
 
-    webbrowser.open(url)
+    def open_url():
+        savout = os.dup(1)  # save stdout
+        saveer = os.dup(2)  # save stdeer
+        os.close(1)  # close stdout
+        os.close(2)  # close stdeer
+        os.open(os.devnull, os.O_RDWR)  # open devnnull as O_RDWR
+        try:
+            webbrowser.open(url)
+        finally:
+            os.dup2(savout, 1)  # return state of stdout
+            os.dup2(saveer, 2)  # return state of stdeer
+
+    process = Process(name="Browsing anime to watch",
+                      target=open_url)
+
+    process.start()
+    os._exit(0)
+
 
 def progress_update(mal, regex, inc):
     items = remove_completed(mal.find(regex))
