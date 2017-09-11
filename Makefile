@@ -1,5 +1,5 @@
 PYTHON = python3
-INSTALL = install
+INSTALL = install --single-version-externally-managed --root=/
 DEVELOP = develop
 TARGET = setup.py
 TEST_DEPLOY = sdist bdist_wheel upload --repository pypitest --sign
@@ -40,7 +40,7 @@ build:
 	@echo "+===============+"
 	@echo "|    BUILD      |"
 	@echo "+===============+"
-	$(PYTHON) $(TARGET) $(BUILD)
+	$(PYTHON) $(TARGET)  $(BUILD)
 
 
 develop:
