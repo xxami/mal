@@ -100,13 +100,12 @@ def create_parser():
     parser_list.add_argument('section',
                              help=('section to display, can be composed by these keywords: '
                                    '[%(choices)s] (default: %(default)s)'),
-                             nargs='*',
-                             action=JoinAction,
+                             nargs='?',
                              default='all',
                              metavar='section',
                              choices=['all', 'watching', 'completed',
-                                      'on', 'hold', 'dropped',
-                                      'plan', 'to', 'watch', 'rewatching'])
+                                      'on hold', 'dropped',
+                                      'plan to watch', 'rewatching'])
     parser_list.add_argument('--extend', action='store_true', # defaults to False
                              help='display extra info such as start/finish dates and tags')
     parser_list.add_argument('--user', type=str, default=None,
