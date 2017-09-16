@@ -24,6 +24,12 @@ from mal import commands
 signal.signal(signal.SIGINT, lambda x, y: killed())
 
 
+class JoinAction(argparse._AppendAction):
+    "Action to join the nargs passed to the argument"
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, ' '.join(values))
+
+
 def create_parser():
     parser = argparse.ArgumentParser(prog='mal',
                                      description='MyAnimeList command line client.')
@@ -37,6 +43,8 @@ def create_parser():
     parser_search = subparsers.add_parser('search',
                                           help='search an anime')
     parser_search.add_argument('anime_regex',
+                               nargs='+',
+                               action=JoinAction,
                                help='regex pattern to match anime titles')
     parser_search.add_argument('--extend', action='store_true', # defaults to false
                                help='display all available information on anime')
@@ -46,6 +54,8 @@ def create_parser():
     parser_filter = subparsers.add_parser('filter',
                                           help='find anime in users list')
     parser_filter.add_argument('anime_regex',
+                               nargs='+',
+                               action=JoinAction,
                                help='regex pattern to match anime titles')
     parser_filter.add_argument('--extend', action='store_true',
                                help='display all available information on anime')
@@ -88,14 +98,15 @@ def create_parser():
     # Parser for "list" command
     parser_list = subparsers.add_parser('list', help='list animes')
     parser_list.add_argument('section',
-                             help=('section to display, can be one of: '
+                             help=('section to display, can be composed by these keywords: '
                                    '[%(choices)s] (default: %(default)s)'),
-                             nargs='?',
+                             nargs='*',
+                             action=JoinAction,
                              default='all',
                              metavar='section',
                              choices=['all', 'watching', 'completed',
-                                      'on hold', 'dropped',
-                                      'plan to watch', 'rewatching'])
+                                      'on', 'hold', 'dropped',
+                                      'plan', 'to', 'watch', 'rewatching'])
     parser_list.add_argument('--extend', action='store_true', # defaults to False
                              help='display extra info such as start/finish dates and tags')
     parser_list.add_argument('--user', type=str, default=None,
@@ -111,6 +122,8 @@ def create_parser():
     parser_drop = subparsers.add_parser('drop',
                                         help='Put a selected anime on drop list')
     parser_drop.add_argument('anime_regex',
+                             action=JoinAction,
+                             nargs='+',
                              help='regex pattern to match anime titles')
     parser_drop.set_defaults(func=commands.drop)
 
@@ -118,6 +131,8 @@ def create_parser():
     parser_watch = subparsers.add_parser('watch',
                                          help='Open the next episode on web browser')
     parser_watch.add_argument('anime_regex',
+                              action=JoinAction,
+                              nargs='+',
                               help='regex pattern to match anime titles')
     parser_watch.set_defaults(func=commands.watch)
 
@@ -132,6 +147,8 @@ def create_parser():
     parser_add = subparsers.add_parser('add',
                                       help='add an anime to the list')
     parser_add.add_argument('anime_regex',
+                            nargs='+',
+                            action=JoinAction,
                             help='regex pattern to match anime titles')
     parser_add.add_argument('status', type=str, nargs='?',
                             default="plan to watch",
