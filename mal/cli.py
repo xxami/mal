@@ -96,6 +96,8 @@ def create_parser():
                              choices=['all', 'watching', 'completed',
                                       'on hold', 'dropped',
                                       'plan to watch', 'rewatching'])
+    parser_list.add_argument('--manga', action='store_true', default=False,
+                             help='use manga list instead')
     parser_list.add_argument('--extend', action='store_true', # defaults to False
                              help='display extra info such as start/finish dates and tags')
     parser_list.add_argument('--user', type=str, default=None,

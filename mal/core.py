@@ -248,9 +248,9 @@ def stats(mal, username=None):
     print("\n".join(lines))
 
 
-def find(mal, regex, filtering='all', extra=False, user=None):
+def find(mal, regex, filtering='all', type='anime', extra=False, user=None):
     """Find all anime in a certain status given a regex."""
-    items = mal.find(regex, extra=extra, user=user)
+    items = mal.find(regex, type=type, extra=extra, user=user)
     if len(items) == 0:
         print(color.colorize("No matches in list ᕙ(⇀‸↼‶)ᕗ", 'red'))
         return
@@ -265,10 +265,10 @@ def find(mal, regex, filtering='all', extra=False, user=None):
     # pretty print all the animes found
     sorted_items = sorted(items, key=itemgetter('status'), reverse=True)
     for index, item in enumerate(sorted_items):
-        anime_pprint(index + 1, item, extra=extra)
+        anime_pprint(index + 1, item, type=type, extra=extra)
 
 
-def anime_pprint(index, item, extra=False):
+def anime_pprint(index, item, type='anime', extra=False):
     """Pretty print an anime's information."""
     padding = int(math.log10(index)) + 3
     remaining_color = ('blue' if item['episode'] < item['total_episodes']
@@ -279,7 +279,7 @@ def anime_pprint(index, item, extra=False):
     template = {
         'index': index,
         'padding': ' ' * padding,
-        'status': MyAnimeList.status_names[item['status']].capitalize(),
+        'status': MyAnimeList.status_names[type][item['status']].capitalize(),
         'title': color.colorize(item['title'], 'red', 'bold'),
         'remaining': color.colorize(remaining, remaining_color, 'bold'),
         'score': color.score_color(item['score']),
@@ -293,9 +293,10 @@ def anime_pprint(index, item, extra=False):
             'tags': item['tags']
         })
 
+    template['media_form'] = 'episodes' if type == 'anime' else 'chapters'
     message_lines = [
         "{index}: {title}".format_map(template),
-        ("{padding}{status} at {remaining} episodes "
+        ("{padding}{status} at {remaining} {media_form} "
          "with score {score} {rewatching}".format_map(template))
     ]
 

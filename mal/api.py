@@ -29,16 +29,53 @@ class MyAnimeList(object):
                   'Chrome/34.0.1847.116 Safari/537.36')
 
     status_names = {
-        1: 'watching',
-        2: 'completed',
-        3: 'on hold',
-        4: 'dropped',
-        6: 'plan to watch',  # not a typo
-        7: 'rewatching'  # this not exists in API
-    }                    # check list function about 'rewatching'
+        'anime': {
+            1: 'watching',
+            2: 'completed',
+            3: 'on hold',
+            4: 'dropped',
+            6: 'plan to watch',  # not a typo
+            7: 'rewatching'  # this not exists in API
+        },
+        'manga': {
+            1: 'reading',
+            2: 'completed',
+            3: 'on hold',
+            4: 'dropped',
+            6: 'plan to read',
+            7: 'rereading'
+        }
+    }
+
+    property_map = {
+        'shared': {
+            'status': 'my_status',
+            'score': 'my_score',
+            'title': 'series_title',
+            'start_date': 'my_start_date',
+            'finish_date': 'my_finish_date',
+            'tags': 'my_tags'
+        },
+        'anime': {
+            'id': 'series_animedb_id',
+            'episode': 'my_watched_episodes',
+            'total_episodes': 'series_episodes',
+            'rewatching': 'my_rewatching'
+
+        },
+        'manga': {
+            'id': 'series_mangadb_id',
+            'episode': 'my_read_chapters',
+            'total_episodes': 'series_chapters',
+            'rewatching': 'my_rereadingg'
+        }
+    }
 
     # reverse of status_names dict
-    status_codes = {v: k for k, v in status_names.items()}
+    status_codes = {
+        'anime': {v: k for k, v in status_names['anime'].items()},
+        'manga': {v: k for k, v in status_names['manga'].items()}
+    }
 
     def __init__(self, config):
         self.username = config[setup.LOGIN_SECTION]['username']
@@ -86,7 +123,7 @@ class MyAnimeList(object):
         return [dict((attr.tag, attr.text) for attr in el) for el in elements]
 
     @checked_connection
-    @animated('preparing animes')
+    @animated('preparing mal data')
     def list(self, status='all', type='anime', extra=False, stats=False, user=None):
         username = self.username if not user else user
 
@@ -103,29 +140,35 @@ class MyAnimeList(object):
         for raw_entry in ET.fromstring(r.text):
             entry = dict((attr.tag, attr.text) for attr in raw_entry)
 
+            map_props = lambda x: self.property_map[type][x] \
+                if x in self.property_map[type] \
+                else self.property_map['shared'][x]
+
+            get_status_name = lambda x: self.status_names[type][x]
+
             # anime information
-            if 'series_animedb_id' in entry:
-                entry_id = int(entry['series_animedb_id'])
+            if map_props('id') in entry:
+                entry_id = int(entry[map_props('id')])
                 result[entry_id] = {
                     'id': entry_id,
-                    'title': entry['series_title'],
-                    'episode': int(entry['my_watched_episodes']),
-                    'status': int(entry['my_status']),
-                    'score': int(entry['my_score']),
-                    'total_episodes': int(entry['series_episodes']),
-                    'rewatching': int(entry['my_rewatching'] or 0),
-                    'status_name': self.status_names[int(entry['my_status'])],
+                    'title': entry[map_props('title')],
+                    'episode': int(entry[map_props('episode')]),
+                    'status': int(entry[map_props('status')]),
+                    'score': int(entry[map_props('score')]),
+                    'total_episodes': int(entry[map_props('total_episodes')]),
+                    'rewatching': int(entry[map_props('rewatching')] or 0),
+                    'status_name': get_status_name(int(entry['my_status']))
                 }
                 # if was rewatching, so the status_name is rewatching
                 if result[entry_id]['rewatching']:
-                    result[entry_id]['status_name'] = 'rewatching'
+                    result[entry_id]['status_name'] = get_status_name(7)
 
                 # add extra info about anime if needed
                 if extra:
                     extra_info = {
-                        'start_date': self._fdate(entry['my_start_date']),
-                        'finish_date': self._fdate(entry['my_finish_date']),
-                        'tags': entry['my_tags']
+                        'start_date': self._fdate(entry[map_props('start_date')]),
+                        'finish_date': self._fdate(entry[map_props('finish_date')]),
+                        'tags': entry[map_props('tags')]
                     }
                     result[entry_id].update(extra_info)
 
@@ -145,10 +188,10 @@ class MyAnimeList(object):
         return datetime.strptime(date, api_format).strftime(self.date_format)
 
     @checked_regex
-    @animated('matching animes')
-    def find(self, regex, status='all', extra=False, user=None):
+    @animated('matching media')
+    def find(self, regex, status='all', type='anime', extra=False, user=None):
         result = []
-        for value in self.list(status, extra=extra, user=user).values():
+        for value in self.list(status, type=type, extra=extra, user=user).values():
             if re.search(regex, value['title'], re.I):
                 result.append(value)
         return result
