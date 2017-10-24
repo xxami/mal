@@ -159,10 +159,10 @@ def add(mal, regex, status="plan to watch"):
     )
 
 
-def stats(mal, username=None):
+def stats(mal, username=None, type='anime'):
     """Print user anime stats."""
     # get all the info
-    animes = mal.list(stats=True, user=username)
+    animes = mal.list(stats=True, user=username, type=type)
     if not animes:
         print_error("Empty query", "username not found",
                     "could not fetch list for user '{}'".format(username),
@@ -193,29 +193,44 @@ def stats(mal, username=None):
     # colored bar. borrowed the bar char from neofetch
     bar = "█"
     colors = ["green", "blue", "yellow", "red", "gray"]
-    lists = ["watching", "completed", "onhold", "dropped", "plantowatch"]
+    lists = {
+        'anime': ["watching", "completed", "onhold", "dropped", "plantowatch"],
+        'manga': ["reading", "completed", "onhold", "dropped", "plantoread"]
+    }
     colored = str()
     if total_entries != 0:  # to prevent division by zero
-        for i, status in enumerate(lists):
+        for i, status in enumerate(lists[type]):
             entries = int(user_info[status])
             bars = round(line_size * (entries / total_entries))
             colored += color.colorize(bar * bars, colors[i])
     else:
         colored = color.colorize(bar * line_size, "white")
 
+    manga_subs = {
+        'watching': 'reading',
+        'plantowatch': 'plantoread',
+    }
+    map_var_props = lambda x: manga_subs[x] \
+        if type == 'manga' and x in manga_subs else x
+
     # format the lines to print more easily afterwards
     template = {
         "days": user_info["days_spent_watching"],
         "mean_score": "{:.2f}".format(mean_score),
-        "watching": user_info["watching"],
+        "watching": user_info[map_var_props("watching")],
         "completed": user_info["completed"],
         "hold": user_info["onhold"],
-        "plan": user_info["plantowatch"],
+        "plan": user_info[map_var_props("plantowatch")],
         "dropped": user_info["dropped"],
         "total_entries": str(total_entries),
         "episodes": str(episodes),
         "rewatched": str(rewatched),
-        "padd": "{p}"  # needed to format with padding afterwards
+        "padd": "{p}",  # needed to format with padding afterwards
+
+        "watching_text": 'Watching' if type != 'manga' else 'Reading',
+        "plantowatch_text": 'Plan to watch' if type != 'manga' else 'Plan to read',
+        "rewatched_text": 'Rewatched' if type != 'manga' else 'Reread',
+        "episodes_text": 'Episodes' if type != 'manga' else 'Chapters'
     }
 
     def point_color(color_name):
@@ -225,13 +240,14 @@ def stats(mal, username=None):
         "Days: {days}{padd}Mean Score: {mean_score}",
         colored,
         (point_color("green"),
-            ["Watching:{padd}{watching}", "Total Entries:{padd}{total_entries}"]),
+            ["{watching_text}:{padd}{watching}",
+             "Total Entries:{padd}{total_entries}"]),
         (point_color("blue"),
-            ["Completed:{padd}{completed}", "Rewatched:{padd}{rewatched}"]),
+            ["Completed:{padd}{completed}", "{rewatched_text}:{padd}{rewatched}"]),
         (point_color("yellow"),
-            ["On-Hold:{padd}{hold}", "Episodes:{padd}{episodes}"]),
+            ["On-Hold:{padd}{hold}", "{episodes_text}:{padd}{episodes}"]),
         (point_color("red"), ["Dropped:{padd}{dropped}"]),
-        (point_color("gray"), ["Plan to Watch:{padd}{plan}"])
+        (point_color("gray"), ["{plantowatch_text}:{padd}{plan}"])
     ]
     # add info to lines and format them to look nice
     def padd_str(string, final_size):
@@ -244,7 +260,8 @@ def stats(mal, username=None):
         for line in lines
     ]
 
-    print(color.colorize("Anime Stats", "white", "underline"))
+    stats_title = 'Anime Stats' if not type == 'manga' else 'Manga Stats'
+    print(color.colorize(stats_title, "white", "underline"))
     print("\n".join(lines))
 
 

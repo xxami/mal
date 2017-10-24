@@ -59,8 +59,9 @@ def drop(mal, args):
 
 
 def stats(mal, args):
+    type = 'anime' if not args.manga else 'manga'
     """Show the users anime watching statistics as presented on MAL."""
-    core.stats(mal, args.user)
+    core.stats(mal, args.user, type=type)
 
 
 def add(mal, args):

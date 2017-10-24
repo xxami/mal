@@ -121,6 +121,8 @@ def create_parser():
                                          help='Show anime watch stats')
     parser_stats.add_argument('--user', type=str, default=None,
                               help='which users list to pull stats from')
+    parser_stats.add_argument('--manga', action='store_true', default=False,
+                            help='use manga list instead')
     parser_stats.set_defaults(func=commands.stats)
 
     # Parser for "add" command
