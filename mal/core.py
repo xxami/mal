@@ -89,17 +89,17 @@ def progress_update(mal, regex, inc):
     response = mal.update(item['id'], entry)
     report_if_fails(response)
 
-
-def search(mal, regex, full=False):
+# todo: debug strange synopsis values for manga
+def search(mal, regex, type='anime', full=False):
     """Search the MAL database for an anime."""
-    result = mal.search(regex)
+    result = mal.search(regex, type=type)
     # if no results or only one was found we treat them special
     if len(result) == 0:
         print(color.colorize("No matches in MAL database ᕙ(⇀‸↼‶)ᕗ", 'red'))
         return
     if len(result) == 1: full = True # full info if only one anime was found
 
-    lines = ["{index}: {title}", "  Episodes: {episodes}\tScore: {score}", "  Synopsis: {synopsis}"]
+    lines = ["{index}: {title}", "  {episodes_text}: {episodes}\tScore: {score}", "  Synopsis: {synopsis}"]
     extra_lines = ["  Start date: {start}\tEnd data: {end}", "  Status: {status}"]
 
     print("Found", color.colorize(str(len(result)), "cyan", "underline"), "animes:")
@@ -109,16 +109,24 @@ def search(mal, regex, full=False):
         if len(synopsis) > 70 and not full:
             synopsis = synopsis[:70] + "..."
 
+        manga_subs = {
+            'episodes': 'chapters',
+        }
+        map_var_props = lambda x: manga_subs[x] \
+            if type == 'manga' and x in manga_subs else x
+
         # this template/line stuff might need some refactoring
         template = {
             "index": str(i + 1),
             "title": color.colorize(anime["title"], "red", "bold"),
-            "episodes": color.colorize(anime["episodes"], "white", "bold"),
+            "episodes": color.colorize(anime[map_var_props("episodes")], "white", "bold"),
             "score": color.score_color(float(anime["score"])),
             "synopsis": synopsis,
             "start": anime["start_date"] if anime["start_date"] != "0000-00-00" else "NA",
             "end": anime["end_date"] if anime["end_date"] != "0000-00-00" else "NA",
-            "status": anime["status"]
+            "status": anime["status"],
+
+            "episodes_text": 'Episodes' if type != 'manga' else 'Chapters'
         }
         print("\n".join(line.format_map(template) for line in lines))
         if full: print("\n".join(line.format_map(template) for line in extra_lines))

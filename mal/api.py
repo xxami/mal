@@ -106,11 +106,11 @@ class MyAnimeList(object):
 
     @checked_connection
     @animated('searching in database')
-    def search(self, query):
+    def search(self, query, type='anime'):
         payload = dict(q=query)
 
         r = requests.get(
-            self.base_url + '/anime/search.xml',
+            self.base_url + '/{type}/search.xml'.format(type=type),
             params=payload,
             auth=(self.username, self.password),
             headers={'User-Agent': self.user_agent}

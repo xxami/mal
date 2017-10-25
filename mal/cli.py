@@ -38,6 +38,8 @@ def create_parser():
                                           help='search an anime')
     parser_search.add_argument('anime_regex',
                                help='regex pattern to match anime titles')
+    parser_search.add_argument('--manga', action='store_true', default=False,
+                            help='search manga instead')
     parser_search.add_argument('--extend', action='store_true', # defaults to false
                                help='display all available information on anime')
     parser_search.set_defaults(func=commands.search)
