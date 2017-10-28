@@ -63,11 +63,13 @@ def create_parser():
                                             aliases=['inc'])
     parser_increase.add_argument('anime_regex',
                                  help='regex pattern to match anime titles')
-    parser_increase.add_argument('episodes',
+    parser_increase.add_argument('--manga', action='store_true', default=False,
+                               help="increase manga's read chapters instead")
+    parser_increase.add_argument('count',
                                  nargs='?',
                                  type=int,
                                  default=1,
-                                 help='number of episodes to increase')
+                                 help='number of episodes/chapters to increase')
     parser_increase.set_defaults(func=commands.increase)
 
     # Parser for "decrease" command
@@ -76,7 +78,9 @@ def create_parser():
                                             aliases=['dec'])
     parser_decrease.add_argument('anime_regex',
                                   help='regex pattern to match anime titles')
-    parser_decrease.add_argument('episodes',
+    parser_decrease.add_argument('--manga', action='store_true', default=False,
+                               help="increase manga's read chapters instead")
+    parser_decrease.add_argument('count',
                                  nargs='?',
                                  type=int,
                                  default=1,

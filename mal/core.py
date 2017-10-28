@@ -44,17 +44,18 @@ def select_item(items):
     return item
 
 
-def start_end(entry, episode, total_episodes):
+def start_end(entry, episode, total_episodes, type='anime'):
     """Fill details of anime if user just started it or finished it."""
     if total_episodes == episode:
-        entry['status'] = MyAnimeList.status_codes['completed']
+        entry['status'] = MyAnimeList.status_codes[type]['completed']
         entry['date_finish'] = date.today().strftime('%m%d%Y')
         print(color.colorize('Series completed!', 'green'))
         score = int(input('Enter a score (or 0 for no score): '))
         if score != 0:
             entry['score'] = score
     elif episode == 1:
-        entry['status'] = MyAnimeList.status_codes['watching']
+        watching_status = 'watching' if type != 'manga' else 'reading'
+        entry['status'] = MyAnimeList.status_codes[type][watching_status]
         entry['date_start'] = date.today().strftime('%m%d%Y')
 
     return entry
@@ -70,11 +71,12 @@ def remove_completed(items):
     return items
 
 
-def progress_update(mal, regex, inc):
-    items = remove_completed(mal.find(regex))
+def progress_update(mal, regex, inc, type='anime'):
+    items = remove_completed(mal.find(regex, type=type))
     item = select_item(items)  # also handles ambigious searches
     episode = item['episode'] + inc
-    entry = dict(episode=episode)
+    entry_type = 'episode' if type == 'anime' else 'chapter'
+    entry = {entry_type: episode}
     template = {
         'title': color.colorize(item['title'], 'yellow', 'bold'),
         'episode': color.colorize(episode, 'red' if inc < 1 else 'green'),
@@ -86,7 +88,7 @@ def progress_update(mal, regex, inc):
            '{episode}/{total_episodes}'.format_map(template)))
 
     entry = start_end(entry, episode, item['total_episodes'])
-    response = mal.update(item['id'], entry)
+    response = mal.update(item['id'], entry, type=type)
     report_if_fails(response)
 
 # todo: debug strange synopsis values for manga
